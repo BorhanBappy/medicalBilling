@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useReactToPrint } from 'react-to-print';
+import React, { useState } from "react";
+import { useReactToPrint } from "react-to-print";
 
 const BillingSystem = () => {
   const [items, setItems] = useState([]);
-  const [itemName, setItemName] = useState('');
-  const [itemPrice, setItemPrice] = useState('');
+  const [itemName, setItemName] = useState("");
+  const [itemPrice, setItemPrice] = useState("");
   const [discount, setDiscount] = useState(0);
 
   const componentRef = React.useRef();
@@ -13,12 +13,34 @@ const BillingSystem = () => {
     content: () => componentRef.current,
   });
 
+  const tests = [
+    { name: "Complete Blood Count (CBC)", price: 400.0 },
+    { name: "Periferal Blood Film / PBF", price: 500.0 },
+    {
+      name: "Blood Circulating Total Eosinophil Count (TCE) / Eosinophil count (CEC/CE/TCE)",
+      price: 400.0,
+    },
+    { name: "Reticulocyte Count (R/C count)", price: 550.0 },
+    { name: "Platelet Count", price: 500.0 },
+    // ... (continue the list with other tests)
+  ];
+
+  const suggestionList = tests.map((test) => test.name);
+
+  const handleItemSelected = (selectedItem) => {
+    const selectedTest = tests.find((test) => test.name === selectedItem);
+    if (selectedTest) {
+      setItemName(selectedItem);
+      setItemPrice(selectedTest.price.toString());
+    }
+  };
+
   const addItem = () => {
     if (itemName && itemPrice) {
       const newItem = { name: itemName, price: parseFloat(itemPrice) };
       setItems([...items, newItem]);
-      setItemName('');
-      setItemPrice('');
+      setItemName("");
+      setItemPrice("");
     }
   };
 
@@ -33,20 +55,30 @@ const BillingSystem = () => {
       <form className="mb-4">
         <input
           type="text"
-          placeholder="Add Test Name"
+          placeholder="Add item"
           value={itemName}
           onChange={(e) => setItemName(e.target.value)}
           className="mr-2 p-2"
+          list="itemSuggestions"
+          onSelect={(e) => handleItemSelected(e.target.value)}
         />
+        <datalist id="itemSuggestions">
+          {suggestionList.map((suggestion, index) => (
+            <option key={index} value={suggestion} />
+          ))}
+        </datalist>
         <input
           type="text"
-          placeholder="price of the test"
-          required
+          placeholder="Add price"
           value={itemPrice}
           onChange={(e) => setItemPrice(e.target.value)}
           className="mr-2 p-2"
         />
-        <button type="button" onClick={addItem} className="p-2 bg-blue-500 text-white">
+        <button
+          type="button"
+          onClick={addItem}
+          className="p-2 bg-blue-500 text-white"
+        >
           Add
         </button>
       </form>
@@ -77,7 +109,11 @@ const BillingSystem = () => {
         />
       </label>
 
-      <button type="button" onClick={handlePrint} className="p-2 bg-green-500 text-white">
+      <button
+        type="button"
+        onClick={handlePrint}
+        className="p-2 bg-green-500 text-white"
+      >
         Print
       </button>
     </div>
