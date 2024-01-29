@@ -1,65 +1,83 @@
-import  { useState } from 'react';
+import React, { useState } from 'react';
+import { useReactToPrint } from 'react-to-print';
 
 const BillingSystem = () => {
   const [items, setItems] = useState([]);
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [discount, setDiscount] = useState(0);
+
+  const componentRef = React.useRef();
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
 
   const addItem = () => {
     if (itemName && itemPrice) {
       const newItem = { name: itemName, price: parseFloat(itemPrice) };
       setItems([...items, newItem]);
-      setTotalPrice(totalPrice + newItem.price);
       setItemName('');
       setItemPrice('');
     }
   };
 
-  const handlePrint = () => {
-    // Implement printing logic (e.g., open a new window or use a print library)
-    // This can depend on your specific requirements and the environment you're working in.
-    // You might want to use a library like 'react-to-print' for printing in a React application.
-    alert('Printing functionality goes here.');
+  const calculateTotal = () => {
+    const totalPrice = items.reduce((acc, item) => acc + item.price, 0);
+    return totalPrice - (totalPrice * discount) / 100;
   };
 
   return (
-    <div>
-      <h1 className='text-center text-5xl'>Billing System</h1>
-      <form>
+    <div className="container mx-auto mt-8">
+      <h1 className="text-center text-5xl mb-8">Billing System</h1>
+      <form className="mb-4">
         <input
           type="text"
-          placeholder='Add item'
+          placeholder="Add Test Name"
           value={itemName}
           onChange={(e) => setItemName(e.target.value)}
+          className="mr-2 p-2"
         />
         <input
           type="text"
-          placeholder='Add price'
+          placeholder="price of the test"
+          required
           value={itemPrice}
           onChange={(e) => setItemPrice(e.target.value)}
+          className="mr-2 p-2"
         />
-        <button type="button" onClick={addItem}>
+        <button type="button" onClick={addItem} className="p-2 bg-blue-500 text-white">
           Add
         </button>
       </form>
 
-      <div>
-        <h2>Items</h2>
+      <div className="mb-4" ref={componentRef}>
+        <h2 className="text-lg font-semibold mb-2">Items</h2>
         <ul>
           {items.map((item, index) => (
-            <li key={index}>
+            <li key={index} className="mb-2">
               {item.name}: ${item.price.toFixed(2)}
             </li>
           ))}
         </ul>
       </div>
 
-      <div>
-        <h2>Total Price: ${totalPrice.toFixed(2)}</h2>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold mb-2">Total Price</h2>
+        <p>${calculateTotal().toFixed(2)}</p>
       </div>
 
-      <button type="button" onClick={handlePrint}>
+      <label className="block mb-2">
+        Discount (%):
+        <input
+          type="number"
+          value={discount}
+          onChange={(e) => setDiscount(parseFloat(e.target.value))}
+          className="ml-2 p-2 border"
+        />
+      </label>
+
+      <button type="button" onClick={handlePrint} className="p-2 bg-green-500 text-white">
         Print
       </button>
     </div>
